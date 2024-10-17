@@ -8,7 +8,7 @@ const DEFAULT_PAGE = import.meta.env.DEFAULT_PAGE;
 
 function Header() {
     return (
-        <div className='flex justify-between items-center p-3 max-w-6xl mx-auto print:hidden'>
+        <div className='flex justify-between items-center p-3 max-w-6xl mx-auto print-hidden'>
             <div className='flex gap-4'>
                 <MenuItem title='home' address={`/?category=${DEFAULT_PAGE}`} Icon={AiFillHome} />
                 <MenuItem title='about' address='/about' Icon={BsFillInfoCircleFill} />

@@ -22,7 +22,7 @@ function App() {
   return (
       <div>
           <Header/>
-          <h1 className='text-2xl font-medium text-amber-600 text-center print:hidden'>Excel Page</h1>
+          <h1 className='text-2xl font-medium text-amber-600 text-center print-hidden'>Excel Page</h1>
           <UpLoadXlsx checkValue={checkValue} upLoadToWebRef={upLoadToWebRef} data={props}/>
       </div>
   )
