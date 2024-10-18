@@ -112,7 +112,8 @@ function valueHelper(value) {
         case 'object':
             return {value:value.text().trim()};
         default:
-            return {value: ''};
+            const val = value === undefined ? '':value;
+            return {value: val};
     }
 }
 
