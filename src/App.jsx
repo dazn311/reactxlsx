@@ -1,10 +1,9 @@
-import { useState,useRef } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
-import './App.css'
+import { useState,useRef } from 'react';
 import Header from "./components/Header.jsx";
 import {getOS} from "./utils/getOS.js";
 import UpLoadXlsx from "./components/UpLoadXlsx.jsx";
+import TablesXlsx from "./components/TablesXlsx/TablesXlsx.jsx";
+import './App.css';
 
 function App() {
     const [fileD, setFileD] = useState({});
@@ -13,17 +12,15 @@ function App() {
 
     // 1.Step: read from user's file for upload to form;step.1
     upLoadToWebRef.current = (fileData) => {
-        // console.log('46 fileData:',fileData);
         setFileD(prev=>({...prev, ...fileData}));
     }
 
-    console.log('21 fileD:',fileD);
-
   return (
-      <div>
+      <div id={'app'}>
           <Header/>
           <h1 className='text-2xl font-medium text-amber-600 text-center print-hidden'>Excel Page</h1>
           <UpLoadXlsx checkValue={checkValue} upLoadToWebRef={upLoadToWebRef} data={props}/>
+          <TablesXlsx fileD={fileD} />
       </div>
   )
 }

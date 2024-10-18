@@ -1,0 +1,22 @@
+.table_resize {
+  //background-color: white;
+  //color: black;
+  border-collapse: collapse;
+  border: 2px solid grey;
+  font-size: 12px;
+  max-width: 1200px;
+  width: 870px;
+  font-family: 'Times New Roman',Times,sans-serif;
+  color: white;
+  tr {
+    border-bottom: 1px solid grey;
+  }
+}
+
+@media print {
+  .table_resize {
+    background-color: white;
+    color: black;
+    max-width: 870px;
+  }
+}

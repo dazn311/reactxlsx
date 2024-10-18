@@ -1,0 +1,18 @@
+$font-stack: Helvetica, sans-serif;
+$primary-color: #333;
+$baseBackgroundColor:#242424;
+
+body {
+  font: 100% $font-stack;
+  color: $primary-color;
+  background-color: $baseBackgroundColor;
+}
+.ant-upload-wrapper {
+  color: goldenrod;
+  .anticon {
+    color: goldenrod !important;
+    &.anticon-delete {
+      color: red !important;
+    }
+  }
+}
