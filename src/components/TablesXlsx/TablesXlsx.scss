@@ -2,7 +2,8 @@
   //background-color: white;
   //color: black;
   border-collapse: collapse;
-  border: 2px solid grey;
+  //border: 2px solid grey;
+  border: 2px double cornflowerblue;
   font-size: 12px;
   max-width: 1200px;
   width: 870px;
@@ -10,6 +11,9 @@
   color: white;
   tr {
     border-bottom: 1px solid grey;
+    td {
+      border-right: 1px solid grey;
+    }
   }
 }
 

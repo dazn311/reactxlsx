@@ -14,7 +14,7 @@ function App() {
     upLoadToWebRef.current = (fileData) => {
         setFileD(prev=>({...prev, ...fileData}));
     }
-
+    // console.log('17 fileD: ',fileD)
   return (
       <div id={'app'}>
           <Header/>

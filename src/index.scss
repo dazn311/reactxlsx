@@ -96,7 +96,10 @@ button:focus-visible {
 @media print {
   .print-hidden {
       display: none !important;
-    }
+  }
+  .ant-upload-wrapper {
+    display: none !important;
+  }
 }
 .uppercase {
   font-variant-caps: all-petite-caps;

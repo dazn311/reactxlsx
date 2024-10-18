@@ -10,6 +10,112 @@ export default allLinesFromXlsHelpers;
 
 const fontName = 'Times New Roman';
 
+function mergeParse(worksheet) {
+    return Object.keys(worksheet['_mergeCells'] ?? {}).reduce((acc,merge/*"A18:A19"*/) => {
+        const [,startCol,startRow,endCol,endRow] = /^([A-Z])(\d+):([A-Z])(\d+)$/.exec(merge);
+        const sc = startCol.charCodeAt(0);
+        const startRowInt = parseInt(startRow);
+        const endRowInt = parseInt(endRow);
+        const ec = endCol.charCodeAt(0);
+
+        if (endRowInt > startRowInt) {
+            const rowSpan = endRowInt - startRowInt +1;//2
+            const row = startRowInt -1;
+            const column = sc -65;
+            acc[row] = {
+                ...acc[row],
+                [column]:{merge:{rowSpan:rowSpan}}
+            };
+            if (rowSpan > 1) {
+                Array(rowSpan -1).fill('').forEach((_,rowOffset) => {
+                    const offset = row + rowOffset +1;
+                    acc[offset] = {
+                        ... acc[offset],
+                        [column]:{style: {display:'none'}}
+
+                    }
+                })
+            }
+        }else if (ec > sc) {
+            const colSpan = ec - sc;
+            const column = sc -65;
+            const row = startRowInt -1;
+            acc[row] = {
+                ...acc[row],
+                [column]:{merge:{colSpan:colSpan +1}}
+            };
+            if (colSpan > 0) {
+                Array(colSpan).fill('').forEach((_,colOffset) => {
+                    const offset = column + colOffset +1;
+                    acc[row] = {
+                        ... acc[row],
+                        [offset]:{ style: {display:'none'}}
+
+                    }
+                })
+            }
+        }
+        return acc;
+    },{});
+}
+
+function worksheetsParse(worksheet,numberToDate) {
+    const mergesObj  = mergeParse(worksheet);
+    // const b11_value = worksheet.cell('B11').value();//Алексеева Наталья Александровна
+    const worksheetKeysArr  = worksheet.usedRange().value();
+    if (!Array.isArray(worksheetKeysArr)) return null;
+
+    const titleIdx = worksheetKeysArr.findIndex(valuesArr => valuesArr.some(Boolean));
+    const startAIdx = worksheetKeysArr.findIndex(valuesArr => /^\d+$/.test(valuesArr[0]));
+    const endAIdx = !!worksheetKeysArr?.findLastIndex ? worksheetKeysArr.findLastIndex(valuesArr => /^\d+$/.test(valuesArr[0])) : -1;//35
+    const lastIndex = !!worksheetKeysArr?.findLastIndex ? worksheetKeysArr.findLastIndex(valuesArr => valuesArr.some(Boolean)) : -1;//35
+
+    worksheet.usedRange().style({
+        fontFamily: 'Times New Roman',
+        verticalAlignment: 'center'
+    });
+    worksheetKeysArr.forEach((valuesArr,row) => {
+        (valuesArr ?? []).forEach((value,col) => {
+            worksheetKeysArr[row][col] = valueHelper(value);
+        })
+    })
+    Object.keys(mergesObj).forEach((row/*"18"*/) => {
+        Object.keys(mergesObj[row] ?? {}).forEach((col) => {
+            if (_isObjectLike(worksheetKeysArr[row][col]))
+            Object.setPrototypeOf(worksheetKeysArr[row][col], mergesObj[row][col]);
+        })
+    });
+
+    // Modify the workbook.
+    // worksheet.cell("A1").value("This is neat!");
+
+    // const num = cell.value(); // 42788
+    // const date = numberToDate(31427); // Wed Jan 15 1986 00:00:00 GMT+0300 (Moscow Standard Time)
+    // eslint-disable-next-line no-debugger
+// debugger
+    return {
+        worksheetArr: worksheetKeysArr,
+        titleIdx,
+        startAIdx,
+        endAIdx,
+        lastIndex,
+        mergesObj
+    };
+}
+
+function valueHelper(value) {
+    switch (typeof value) {
+        case 'string':
+            return {value:value.trim()};
+        case 'number':
+            return {value:String(value)};
+        case 'object':
+            return {value:value.text().trim()};
+        default:
+            return {value: ''};
+    }
+}
+
 // function sortKeysHelper(worksheetsObj={}) {
 //     return Object.keys(worksheetsObj['columns']).sort((a, b) => {
 //         if(a < b) { return -1; }
@@ -60,89 +166,7 @@ const fontName = 'Times New Roman';
 //         "children": []
 //     },
 // }
-function mergeParse(worksheet) {
-    return Object.keys(worksheet['_mergeCells'] ?? {}).reduce((acc,merge/*"A18:A19"*/) => {
-        const [,startCol,startRow,endCol,endRow] = /^([A-Z])(\d+):([A-Z])(\d+)$/.exec(merge);
-        const sc = startCol.charCodeAt(0);
-        const startRowInt = parseInt(startRow);
-        const endRowInt = parseInt(endRow);
-        const ec = endCol.charCodeAt(0);
 
-        if (endRowInt > startRowInt) {
-            // acc[`${startCol}${startRowInt -1}`] = {rowSpan:endRowInt - startRowInt +1};
-            acc[`${startRowInt -1}`] = {
-                ...acc[`${startRowInt -1}`],
-                [sc -65]:{merge:{rowSpan:endRowInt - startRowInt +1}}
-            };
-            // acc[`${endCol}${endRowInt-1}`] = {delete:true};
-        }else if (ec > sc) {
-            // acc[`${startCol}${startRowInt-1}`] = {colSpan:ec - sc +1};
-            acc[`${startRowInt -1}`] = {
-                ...acc[`${startRowInt -1}`],
-                [sc -65]:{merge:{colSpan:ec - sc +1}}
-            };
-            // acc[`${endCol}${endRowInt-1}`] = {delete:true};
-        }
-        return acc;
-    },{});
-}
-
-function worksheetsParse(worksheet,numberToDate) {
-    const mergesObj  = mergeParse(worksheet);
-    // const b11_value = worksheet.cell('B11').value();//Алексеева Наталья Александровна
-    const worksheetKeysArr  = worksheet.usedRange().value();
-    if (!Array.isArray(worksheetKeysArr)) return null;
-
-    const titleIdx = worksheetKeysArr.findIndex(valuesArr => valuesArr.some(Boolean));
-    const startAIdx = worksheetKeysArr.findIndex(valuesArr => /^\d+$/.test(valuesArr[0]));
-    const endAIdx = !!worksheetKeysArr?.findLastIndex ? worksheetKeysArr.findLastIndex(valuesArr => /^\d+$/.test(valuesArr[0])) : -1;//35
-    const lastIndex = !!worksheetKeysArr?.findLastIndex ? worksheetKeysArr.findLastIndex(valuesArr => valuesArr.some(Boolean)) : -1;//35
-
-    worksheet.usedRange().style({
-        fontFamily: 'Times New Roman',
-        verticalAlignment: 'center'
-    });
-    worksheetKeysArr.forEach((valuesArr,row) => {
-        (valuesArr ?? []).forEach((value,col) => {
-            worksheetKeysArr[row][col] = valueHelper(value);
-        })
-    })
-    Object.keys(mergesObj).forEach((row/*"18"*/) => {
-        Object.keys(mergesObj[row] ?? {}).forEach((col) => {
-            if (_isObjectLike(worksheetKeysArr[row][col]))
-            Object.setPrototypeOf(worksheetKeysArr[row][col], mergesObj[row][col]);
-        })
-    });
-
-    // Modify the workbook.
-    // worksheet.cell("A1").value("This is neat!");
-
-    // const num = cell.value(); // 42788
-    // const date = numberToDate(31427); // Wed Jan 15 1986 00:00:00 GMT+0300 (Moscow Standard Time)
-    // eslint-disable-next-line no-debugger
-// debugger
-    return {
-        worksheetArr: worksheetKeysArr,
-        titleIdx,
-        startAIdx,
-        endAIdx,
-        lastIndex,
-    };
-
-}
-
-function valueHelper(value) {
-    switch (typeof value) {
-        case 'string':
-            return {value:value.trim()};
-        case 'number':
-            return {value:String(value)};
-        case 'object':
-            return {value:value.text().trim()};
-        default:
-            return {value: ''};
-    }
-}
 //     [].reduce((accObj,key,idx)=> {
 //     const [,c,r] = /([A-Z])(\d+)/.exec(key);
 //     accObj['columns'][c] = c;

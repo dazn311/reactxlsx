@@ -42,9 +42,11 @@ function TrLine({LineArr = [], idx = 0, worksheetArr = []}) {
         {
             LineArr.map((valueObj, index) => {
                 const mergeObj = _get(valueObj, ['merge'],{});
+                const styleObj = _get(valueObj, ['style'],{});
                 return (<td
                         key={`${valueObj.value + index}-${index}-${idx}`}
                         data-col={idx}
+                        style={{...styleObj, padding: 4,textAlign:'center'}}
                         // style={{...style,...bold, padding: 4,textAlign:textAlign}}
                         {...mergeObj}
                     >
