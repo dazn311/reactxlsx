@@ -1,5 +1,5 @@
 import {useState, useEffect} from "react";
-import {Button, Tag, Input, Space,Switch} from "antd";
+import {Button, Tag, Space} from "antd";
 import DownloadOutlined from "../../icons/DownloadOutlined.jsx";
 import _get from 'lodash/get';
 import './ServiceBlock.scss';
@@ -7,10 +7,9 @@ import './ServiceBlock.scss';
 function ServiceBlock({fileDataArr,onClickSave}) {
     const [tagsData, setTags] = useState(['№', 'ФИО', 'Дата', 'Sports']);
     const [selectedTags, setSelectedTags] = useState(['№', 'ФИО', 'Дата']);
-//headTabIdx
+
     useEffect(()=> {
         const headTabIdx = _get(fileDataArr,[0,'headTabIdx']);
-        console.log(_get(fileDataArr,[0,'worksheetArr',headTabIdx]));
         const headArr = [..._get(fileDataArr,[0,'worksheetArr',headTabIdx],[])];
         setTags(headArr.slice(0,4).map((item) => item.value));
         setSelectedTags(headArr.slice(0,3).map((item) => item.value));
@@ -39,7 +38,7 @@ function ServiceBlock({fileDataArr,onClickSave}) {
                     fontSize: 16,
                     border:'none'
                 }}>объединить:</Tag>
-                {tagsData.map((tag) => (
+                {tagsData.length > 0 ? tagsData.map((tag) => (
                     <Tag.CheckableTag
                         key={tag}
                         style={{
@@ -53,7 +52,7 @@ function ServiceBlock({fileDataArr,onClickSave}) {
                     >
                         {tag}
                     </Tag.CheckableTag>
-                ))}
+                )) : null}
             </Space.Compact>
             <Space.Compact>
                 <Button
