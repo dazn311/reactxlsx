@@ -8,7 +8,7 @@ const allLinesFromXlsHelpers = {
 
 export default allLinesFromXlsHelpers;
 
-const fontName = 'Times New Roman';
+// const fontName = 'Times New Roman';
 
 function mergeParse(worksheet) {
     return Object.keys(worksheet['_mergeCells'] ?? {}).reduce((acc,merge/*"A18:A19"*/) => {
@@ -42,7 +42,7 @@ function mergeParse(worksheet) {
             const row = startRowInt -1;
             acc[row] = {
                 ...acc[row],
-                [column]:{merge:{colSpan:colSpan +1}}
+                [column]:{merge:{colSpan:colSpan +1}}//,style: {textWrap:'nowrap'}
             };
             if (colSpan > 0) {
                 Array(colSpan).fill('').forEach((_,colOffset) => {
@@ -66,25 +66,52 @@ function worksheetsParse(worksheet,numberToDate) {
     if (!Array.isArray(worksheetKeysArr)) return null;
 
     const titleIdx = worksheetKeysArr.findIndex(valuesArr => valuesArr.some(Boolean));
+    const headTabIdx = worksheetKeysArr.findIndex(valuesArr => valuesArr.some(v => /№|фио|дата/i.test(v)));
+    const colNumTypeArr = [...worksheetKeysArr[headTabIdx]].reduce((accArr,val) => {
+        switch (true) {
+            case /^№$/i.test(val):
+            case /Сумма|Начислено|На руки/i.test(val):
+                accArr.push('number');
+                break;
+            case /Дата|рождения/i.test(val):
+                accArr.push('date');
+                break;
+            default:
+                accArr.push('string');
+                break;
+        }
+       return accArr;
+    },[]);
     const startAIdx = worksheetKeysArr.findIndex(valuesArr => /^\d+$/.test(valuesArr[0]));
     const endAIdx = !!worksheetKeysArr?.findLastIndex ? worksheetKeysArr.findLastIndex(valuesArr => /^\d+$/.test(valuesArr[0])) : -1;//35
     const lastIndex = !!worksheetKeysArr?.findLastIndex ? worksheetKeysArr.findLastIndex(valuesArr => valuesArr.some(Boolean)) : -1;//35
 
-    worksheet.usedRange().style({
-        fontFamily: 'Times New Roman',
-        verticalAlignment: 'center'
-    });
     worksheetKeysArr.forEach((valuesArr,row) => {
         (valuesArr ?? []).forEach((value,col) => {
-            worksheetKeysArr[row][col] = valueHelper(value);
+            worksheetKeysArr[row][col] = valueHelper(value,colNumTypeArr[col],numberToDate);
         })
-    })
+    });
     Object.keys(mergesObj).forEach((row/*"18"*/) => {
         Object.keys(mergesObj[row] ?? {}).forEach((col) => {
             if (_isObjectLike(worksheetKeysArr[row][col]))
             Object.setPrototypeOf(worksheetKeysArr[row][col], mergesObj[row][col]);
         })
     });
+
+    // const {rangeTab} = worksheetKeysArr.reduce((acc, cellsArr,idx) => {
+    //
+    //     return acc;
+    // },{
+    //     rangeTab:'A10:H33',
+    //     colWidth:worksheetKeysArr[0].length,
+    // });
+    // worksheet.range(rangeTab).style({
+    //     fontFamily: 'Times New Roman',
+    //     verticalAlignment: 'center',
+    //     // alignment:{ wrapText: false }
+    //     wrapText: false
+    //     // textWrap:'nowrap'
+    // });
 
     // Modify the workbook.
     // worksheet.cell("A1").value("This is neat!");
@@ -96,6 +123,7 @@ function worksheetsParse(worksheet,numberToDate) {
     return {
         worksheetArr: worksheetKeysArr,
         titleIdx,
+        headTabIdx,
         startAIdx,
         endAIdx,
         lastIndex,
@@ -103,19 +131,34 @@ function worksheetsParse(worksheet,numberToDate) {
     };
 }
 
-function valueHelper(value) {
-    switch (typeof value) {
+function valueHelper(value,type='string',numberToDate) {
+    value = !!value ? value : '';
+    switch (type) {
         case 'string':
-            return {value:value.trim()};
+            if (typeof value === 'object') {
+                return {value:value.text().trim()};
+            }
+            return {value: typeof value === 'string' ? value.trim() : value};
         case 'number':
             return {value:String(value)};
         case 'object':
             return {value:value.text().trim()};
+        case 'date':
+            if (!value || /Invalid Date/i.test(numberToDate(value))) {
+                return {value: !!value ? value : ''};
+            }
+            const date = numberToDate(value);
+            return {value:`${date.getDate()}.${date.getMonth() +1}.${date.getFullYear()}`};//.style("numberFormat",'dd.MM.yy')
         default:
             const val = value === undefined ? '':value;
             return {value: val};
     }
 }
+
+// worksheet.usedRange().style({
+//     fontFamily: 'Times New Roman',
+//     verticalAlignment: 'center'
+// });
 
 // function sortKeysHelper(worksheetsObj={}) {
 //     return Object.keys(worksheetsObj['columns']).sort((a, b) => {

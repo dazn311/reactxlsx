@@ -24,6 +24,8 @@ export default function TablesXlsx({fileD = {}}) {
                                         key={idx}
                                         worksheetArr={worksheetArr}
                                         idx={idx}
+                                        startAIdx={startAIdx}
+                                        endAIdx={endAIdx}
                                         LineArr={LineArr}/>
                                 ))
                             }
@@ -35,18 +37,18 @@ export default function TablesXlsx({fileD = {}}) {
     );
 }
 
-function TrLine({LineArr = [], idx = 0, worksheetArr = []}) {
+function TrLine({LineArr = [], idx = 0, startAIdx=0, endAIdx=0}) {
     if (!Array.isArray(LineArr)) return null;
 
     return (<tr>
         {
             LineArr.map((valueObj, index) => {
                 const mergeObj = _get(valueObj, ['merge'],{});
-                const styleObj = _get(valueObj, ['style'],{});
+
                 return (<td
                         key={`${valueObj.value + index}-${index}-${idx}`}
                         data-col={idx}
-                        style={{...styleObj, padding: 4,textAlign:'center'}}
+                        style={stylesHelper(valueObj,idx,startAIdx,endAIdx)}
                         // style={{...style,...bold, padding: 4,textAlign:textAlign}}
                         {...mergeObj}
                     >
@@ -56,6 +58,14 @@ function TrLine({LineArr = [], idx = 0, worksheetArr = []}) {
             })
         }
     </tr>);
+}
+
+function stylesHelper(valueObj,idx,startAIdx,endAIdx) {
+    return {..._get(valueObj, ['style'],{}),
+        padding: 4,
+        textAlign:'center',
+        ...(idx >= startAIdx && idx < endAIdx) ? {textWrap:'nowrap'}:{}
+    };
 }
 // if (value === undefined) {
 //     // return null;
