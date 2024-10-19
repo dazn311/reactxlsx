@@ -1,15 +1,47 @@
+import React from "react";
 import _get from 'lodash/get';
+import ServiceBlock from "./ServiceBlock/ServiceBlock.jsx";
+import XlsxPopulate from "xlsx-populate/browser/xlsx-populate";
 import './tablesXlsx.scss';
 
 export default function TablesXlsx({fileD = {}}) {
+    const tabRef = React.useRef(null);
     const fileDataArr = Object.values(fileD);
+    const saveHandler = () => {
+        // Load a new blank workbook
+        XlsxPopulate.fromBlankAsync()
+            .then(workbook => {
+                // Modify the workbook.
+                // workbook.sheet("Sheet1").cell("A1").value("This is neat!");
+                workbook.sheet(0).cell("A1").value([
+                    [1, 2, 3],
+                    [4, 5, 6],
+                    [7, 8, 9]
+                ]);
+
+                // Write to file.
+                return workbook.outputAsync()
+                    .then(workbookBlob => {
+                        const url = URL.createObjectURL(workbookBlob);
+                        const downloadAnchorNode = document.createElement("a");
+                        downloadAnchorNode.setAttribute("href", url);
+                        downloadAnchorNode.setAttribute("download", 'fileName2.xlsx');
+                        downloadAnchorNode.click();
+                        downloadAnchorNode.remove();
+                    });
+            });
+    }
 
     return (
         <div className='group cursor-pointer sm:m-2'>
+            <ServiceBlock onClickSave={saveHandler}
+                fileDataArr={fileDataArr}
+            />
             {
                 fileDataArr.map(({worksheetArr, startAIdx, lastIndex, endAIdx, titleIdx}, idx) => (
                     <div key={'tables_' + idx} className='p-2'>
                         <table
+                            ref={tabRef}
                             cellPadding={"0"}
                             cellSpacing={"0"}
                             id={"table_resize"}
@@ -107,7 +139,6 @@ function stylesHelper(valueObj,idx,startAIdx,endAIdx) {
 //     }
 // }
 
-import {Table} from 'antd';
 // const fObj = fileDataArr[0].fileData[0];
 // const fKeys = Object.keys(fObj ?? {});
 // const columns = [...Array(fKeys.length).fill('').map((_, i) => ({
