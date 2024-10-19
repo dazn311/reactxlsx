@@ -36,16 +36,20 @@ function ServiceBlock({fileDataArr,onClickSave}) {
                     color: "#813a03",
                     backgroundColor:'transparent',
                     fontSize: 16,
-                    border:'none'
+                    border:'none',
+                    paddingInline:5,
+                    marginInlineEnd:4
                 }}>объединить:</Tag>
                 {tagsData.length > 0 ? tagsData.map((tag) => (
                     <Tag.CheckableTag
                         key={tag}
                         style={{
-                            color: selectedTags.includes(tag) ? 'darkmagenta' :"#f56a00",//darkmagenta
-                            backgroundColor:selectedTags.includes(tag) ? 'grey' :'transparent',
+                            color: selectedTags.includes(tag) ? 'darkseagreen' :"#f56a00",//darkmagenta
+                            backgroundColor:selectedTags.includes(tag) ? '#80808075' :'transparent',
                             fontSize: 14,
                             padding: '0 5px',
+                            paddingInline:5,
+                            marginInlineEnd:4
                     }}
                         checked={selectedTags.includes(tag)}
                         onChange={(checked) => handleChange(tag, checked)}
