@@ -1,5 +1,4 @@
 import { useState,useRef } from 'react';
-import Header from "./components/Header.jsx";
 import {getOS} from "./utils/getOS.js";
 import UpLoadXlsx from "./components/UpLoadXlsx.jsx";
 import TablesXlsx from "./components/TablesXlsx/TablesXlsx.jsx";
@@ -17,7 +16,6 @@ function App() {
     // console.log('17 fileD: ',fileD)
   return (
       <div id={'app'}>
-          <Header/>
           <h1 className='text-2xl font-medium text-amber-600 text-center print-hidden'>Excel Page</h1>
           <UpLoadXlsx checkValue={checkValue} upLoadToWebRef={upLoadToWebRef} data={props}/>
           <TablesXlsx fileD={fileD} />

@@ -34,7 +34,7 @@ function ServiceBlock({fileDataArr,onClickSave}) {
         >
             <Space.Compact>
                 <Tag style={{
-                    color: "#813a03",//darkmagenta
+                    color: "#813a03",
                     backgroundColor:'transparent',
                     fontSize: 16,
                     border:'none'
@@ -45,7 +45,8 @@ function ServiceBlock({fileDataArr,onClickSave}) {
                         style={{
                             color: selectedTags.includes(tag) ? 'darkmagenta' :"#f56a00",//darkmagenta
                             backgroundColor:selectedTags.includes(tag) ? 'grey' :'transparent',
-                            fontSize: 16
+                            fontSize: 14,
+                            padding: '0 5px',
                     }}
                         checked={selectedTags.includes(tag)}
                         onChange={(checked) => handleChange(tag, checked)}
