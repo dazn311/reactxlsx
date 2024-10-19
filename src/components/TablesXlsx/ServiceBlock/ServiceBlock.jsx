@@ -2,9 +2,10 @@ import {useState, useEffect} from "react";
 import {Button, Tag, Space} from "antd";
 import DownloadOutlined from "../../icons/DownloadOutlined.jsx";
 import _get from 'lodash/get';
+import {saveXlsx} from "../../../utils/saveXlsx.js";
 import './ServiceBlock.scss';
 
-function ServiceBlock({fileDataArr,onClickSave}) {
+function ServiceBlock({fileDataArr}) {
     const [tagsData, setTags] = useState(['№', 'ФИО', 'Дата', 'Sports']);
     const [selectedTags, setSelectedTags] = useState(['№', 'ФИО', 'Дата']);
 
@@ -14,6 +15,7 @@ function ServiceBlock({fileDataArr,onClickSave}) {
         setTags(headArr.slice(0,4).map((item) => item.value));
         setSelectedTags(headArr.slice(0,3).map((item) => item.value));
     },[fileDataArr])
+
     if (fileDataArr.length === 0) {
         return null;
     }
@@ -21,9 +23,13 @@ function ServiceBlock({fileDataArr,onClickSave}) {
         const nextSelectedTags = checked
             ? [...selectedTags, tag]
             : selectedTags.filter((t) => t !== tag);
-        console.log('You are interested in: ', nextSelectedTags);
         setSelectedTags(nextSelectedTags);
     };
+
+    const saveHandler = () => {
+        saveXlsx(fileDataArr);
+    }
+
     return <div className="service-block">
         <Space
             direction="horizontal"
@@ -62,7 +68,7 @@ function ServiceBlock({fileDataArr,onClickSave}) {
                 <Button
                     type="primary"
                     icon={<DownloadOutlined/>}
-                    onClick={onClickSave}
+                    onClick={saveHandler}
                     ghost
                     style={{ color: "#f56a00", borderColor: "#f56a00" }}
                     size={'small'}>
