@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import _get from 'lodash/get';
 import ServiceBlock from "./ServiceBlock/ServiceBlock.jsx";
-import {DatePicker} from "antd";
+import {DatePicker, Input} from "antd";
 import dayjs from 'dayjs';
 import './tablesXlsx.scss';
 
@@ -81,20 +81,37 @@ function EditBaseAndDate({type,value,index}) {
     const [isEdit,setIsEdit] = useState(false);
     const clickHandler = (event) => {
         setIsEdit(prevState => !prevState);
-        // console.log('85 event:',event.locale('ru-RU').format());
+        console.log('85 event:',event.locale('ru-RU').format());
+    }
+    const divClickHandler = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        console.log('94 event:',event.target.value);
+        console.log('95 key:',event);
+    }
+    const onEnterHandler = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        console.log('95 key:',event);
+        if (!event.altKey) {
+            setIsEdit(!event.target.value);
+        }
     }
     // console.log('86 date:',dayjs('2018-05-09').locale('ru-RU').format('DD.MM.YYYY'));
 
-    if (isEdit && type === 'date') {
-        return (<DatePicker
-            getValueProps={(value) => ({ value: !!value ? dayjs(value) : "", })}
-            // value={'2024-02-15'}
-            onChange={clickHandler}
-            defaultValue={dayjs(value)}
-            format="DD.MM.YYYY"
-            size={'small'}  />)
+    if (isEdit) {
+        if (type === 'date') {
+            return (<DatePicker
+                getValueProps={(value) => ({ value: !!value ? dayjs(value) : "", })}
+                // value={'2024-02-15'}
+                onChange={clickHandler}
+                defaultValue={dayjs(value)}
+                format="DD.MM.YYYY"
+                size={'small'}  />)
+        }
+        return <Input value={String(value)} onPressEnter={onEnterHandler} onChange={divClickHandler}/>
     }
-    return (<div contentEditable={isEdit} data-column={index} onClick={clickHandler} >
+    return (<div contentEditable={false} data-column={index} onClick={()=>setIsEdit(true)} >
               {type === 'date' ? dayjs(value).locale('ru-RU').format('DD.MM.YYYY') : String(value)}
             </div>);
 }
