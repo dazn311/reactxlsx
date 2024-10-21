@@ -1,6 +1,8 @@
-import React from "react";
+import React, {useState} from "react";
 import _get from 'lodash/get';
 import ServiceBlock from "./ServiceBlock/ServiceBlock.jsx";
+import {DatePicker} from "antd";
+import dayjs from 'dayjs';
 import './tablesXlsx.scss';
 
 export default function TablesXlsx({fileD = {}}) {
@@ -49,6 +51,11 @@ function TrLine({LineArr = [], idx = 0, startAIdx=0, endAIdx=0}) {
         {
             LineArr.map((valueObj, index) => {
                 const mergeObj = _get(valueObj, ['merge'],{});
+                const type = _get(valueObj, ['type'],'string');
+                // if (type === 'date') {
+                //     console.log('52 valueObj:',valueObj)
+                //     console.log('52 dayjs(valueObj.value):',dayjs(valueObj.value))
+                // }
 
                 return (<td
                         key={`${valueObj.value + index}-${index}-${idx}`}
@@ -57,7 +64,12 @@ function TrLine({LineArr = [], idx = 0, startAIdx=0, endAIdx=0}) {
                         // style={{...style,...bold, padding: 4,textAlign:textAlign}}
                         {...mergeObj}
                     >
-                        <div contentEditable={true} data-column={index}>{String(valueObj.value)}</div>
+                        <EditBaseAndDate
+                            type={type}
+                            index={index}
+                            value={valueObj.value}
+                        />
+
                     </td>
                 )
             })
@@ -65,8 +77,31 @@ function TrLine({LineArr = [], idx = 0, startAIdx=0, endAIdx=0}) {
     </tr>);
 }
 
-function stylesHelper(valueObj,idx,startAIdx,endAIdx) {
-    return {..._get(valueObj, ['style'],{}),
+function EditBaseAndDate({type,value,index}) {
+    const [isEdit,setIsEdit] = useState(false);
+    const clickHandler = (event) => {
+        setIsEdit(prevState => !prevState);
+        // console.log('85 event:',event.locale('ru-RU').format());
+    }
+    // console.log('86 date:',dayjs('2018-05-09').locale('ru-RU').format('DD.MM.YYYY'));
+
+    if (isEdit && type === 'date') {
+        return (<DatePicker
+            getValueProps={(value) => ({ value: !!value ? dayjs(value) : "", })}
+            // value={'2024-02-15'}
+            onChange={clickHandler}
+            defaultValue={dayjs(value)}
+            format="DD.MM.YYYY"
+            size={'small'}  />)
+    }
+    return (<div contentEditable={isEdit} data-column={index} onClick={clickHandler} >
+              {type === 'date' ? dayjs(value).locale('ru-RU').format('DD.MM.YYYY') : String(value)}
+            </div>);
+}
+
+function stylesHelper(valueObj, idx, startAIdx, endAIdx) {
+    return {
+        ..._get(valueObj, ['style'],{}),
         padding: 4,
         textAlign:'center',
         ...(idx >= startAIdx && idx < endAIdx) ? {textWrap:'nowrap'}:{}

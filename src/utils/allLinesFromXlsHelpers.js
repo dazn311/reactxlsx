@@ -10,8 +10,8 @@ export default allLinesFromXlsHelpers;
 
 // const fontName = 'Times New Roman';
 
-function mergeParse(worksheet) {
-    return Object.keys(worksheet['_mergeCells'] ?? {}).reduce((acc,merge/*"A18:A19"*/) => {
+function mergeParse(mergeCells) {
+    return mergeCells.reduce((acc,merge/*"A18:A19"*/) => {
         const [,startCol,startRow,endCol,endRow] = /^([A-Z])(\d+):([A-Z])(\d+)$/.exec(merge);
         const sc = startCol.charCodeAt(0);
         const startRowInt = parseInt(startRow);
@@ -60,7 +60,8 @@ function mergeParse(worksheet) {
 }
 
 function worksheetsParse(worksheet,numberToDate) {
-    const mergesObj  = mergeParse(worksheet);
+    const mergeCells = Object.keys(worksheet['_mergeCells'] ?? {});
+    const mergesObj  = mergeParse(mergeCells);
     // const b11_value = worksheet.cell('B11').value();//Алексеева Наталья Александровна
     const worksheetKeysArr  = worksheet.usedRange().value();
     if (!Array.isArray(worksheetKeysArr)) return null;
@@ -127,7 +128,8 @@ function worksheetsParse(worksheet,numberToDate) {
         startAIdx,
         endAIdx,
         lastIndex,
-        mergesObj
+        mergesObj,
+        mergeCells
     };
 }
 
@@ -138,21 +140,33 @@ function valueHelper(value,type='string',numberToDate) {
             if (typeof value === 'object') {
                 return {value:value.text().trim()};
             }
-            return {value: typeof value === 'string' ? value.trim() : value};
+            return {value: typeof value === 'string' ? value.trim() : value,
+                type:'string'};
         case 'number':
-            return {value:String(value)};
+            return {value:String(value),
+                type:'number'};
         case 'object':
-            return {value:value.text().trim()};
+            return {value:value.text().trim(),
+                type:'object'};
         case 'date':
             if (!value || /Invalid Date/i.test(numberToDate(value))) {
                 return {value: !!value ? value : ''};
             }
             const date = numberToDate(value);
-            return {value:`${date.getDate()}.${date.getMonth() +1}.${date.getFullYear()}`};//.style("numberFormat",'dd.MM.yy')
+            return {
+                // value:`${padHelper(date.getDate())}.${padHelper(date.getMonth() +1)}.${date.getFullYear()}`,
+                value:`${date.getFullYear()}-${padHelper(date.getMonth() +1)}-${padHelper(date.getDate())}`,
+                // value:new Date('2015-01-01').toISOString(),
+                type:'date'
+            };//.style("numberFormat",'dd.MM.yy')
         default:
             const val = value === undefined ? '':value;
             return {value: val};
     }
+}
+
+function padHelper(value) {
+    return value < 10 ? `0${value}`: value;
 }
 
 // worksheet.usedRange().style({

@@ -8,6 +8,7 @@ import './ServiceBlock.scss';
 function ServiceBlock({fileDataArr}) {
     const [tagsData, setTags] = useState(['№', 'ФИО', 'Дата', 'Sports']);
     const [selectedTags, setSelectedTags] = useState(['№', 'ФИО', 'Дата']);
+    const [loadings, setLoadings] = useState(false);
 
     useEffect(()=> {
         const headTabIdx = _get(fileDataArr,[0,'headTabIdx']);
@@ -27,7 +28,11 @@ function ServiceBlock({fileDataArr}) {
     };
 
     const saveHandler = () => {
-        saveXlsx(fileDataArr);
+        setLoadings(true);
+        saveXlsx(fileDataArr)
+            .finally(() => {
+                setLoadings(false);
+            });
     }
 
     return <div className="service-block">
@@ -70,6 +75,7 @@ function ServiceBlock({fileDataArr}) {
                     icon={<DownloadOutlined/>}
                     onClick={saveHandler}
                     ghost
+                    loading={loadings}
                     style={{ color: "#f56a00", borderColor: "#f56a00" }}
                     size={'small'}>
                     Сохранить
