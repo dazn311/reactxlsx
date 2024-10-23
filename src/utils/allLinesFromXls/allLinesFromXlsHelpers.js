@@ -29,7 +29,9 @@ function worksheetsParse(worksheet,numberToDate) {
         startAIdx,
         endAIdx,
         lastTabIndex,
-        lastIndex
+        lastIndex,
+        lengthForMerge,
+        widthColumns
       } = endTabIdx(worksheetKeysArr,mergeCells,worksheet);
 
     worksheetKeysArr.forEach((valuesArr,row) => {
@@ -75,7 +77,9 @@ function worksheetsParse(worksheet,numberToDate) {
         lastTabIndex,
         lastIndex,
         mergesObj,
-        mergeCells
+        mergeCells,
+        lengthForMerge,
+        widthColumns
     };
 }
 

@@ -10,12 +10,19 @@ export function endTabIdx(worksheetKeysArr=[],mergeCells,worksheet) {
   const lastTabIndex = worksheetKeysArr.findIndex((valuesArr,idx) => idx > startAIdx && !valuesArr.some(Boolean));//35
   const firstEmptyAIndex = worksheetKeysArr.findIndex((valuesArr,idx) => idx > startAIdx && !valuesArr[0]);//35
 
-  // Get the B column, set its width and unhide it (assuming it was hidden).
   // const width = worksheet.column("B").width();//35.9766
   // const cell = worksheet.row(startAIdx+1).cell(3); // Returns the cell at C5.
   // const value = cell.value();
   // const value2 = worksheet.row(firstEmptyAIndex).cell(2).value();//'Булах Оксана Викторовна'
-  const lengthForMerge = colNumTypeArr.findIndex((_,idx)=> worksheet.row(firstEmptyAIndex + 1).cell(idx + 1).value() !== undefined);
+
+  //for ServiceBlock;
+  const lengthForMerge = lengthForMergeHelper(worksheet,colNumTypeArr,mergeCells,firstEmptyAIndex);
+  const widthColumns = colNumTypeArr.reduce((accArr, _, idx)=>{
+    // Get the B column, set its width and unhide it (assuming it was hidden).
+    const width = worksheet.column(String.fromCharCode(idx+65)).width();//35.9766
+    accArr.push(width);
+    return accArr;
+  },[]);
 
 
   return {
@@ -26,8 +33,24 @@ export function endTabIdx(worksheetKeysArr=[],mergeCells,worksheet) {
     endAIdx,
     lastTabIndex,
     lastIndex,
-    lengthForMerge
+    lengthForMerge,
+    widthColumns
   }
+}
+
+function lengthForMergeHelper(worksheet,colNumTypeArr=[],mergeCells=[],firstEmptyAIndex=0) {
+  const mergeCellsSt = mergeCells.join('|');
+  return colNumTypeArr.findIndex((_,idx)=> {
+    const currCol = idx +1;
+    const val = worksheet.row(firstEmptyAIndex + 1).cell(currCol).value();
+
+    if (val !== undefined) {
+      const regx = new RegExp(`${String.fromCharCode(idx+65-1)}${firstEmptyAIndex}:\\w+`,'g');
+      return mergeCellsSt.match(regx);
+    }
+
+    return false;
+  });
 }
 
 function colNumTypeArrHelper(worksheetKeysArr,headTabIdx) {
