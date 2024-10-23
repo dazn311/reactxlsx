@@ -1,0 +1,12 @@
+.service-block {
+  //display: flex;
+  //justify-content: space-between;
+  margin-top: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+@media print {
+  .service-block {
+    display: none;
+  }
+}

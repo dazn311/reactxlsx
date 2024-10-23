@@ -10,6 +10,7 @@ function UpLoadXlsx({data,checkValue,upLoadToWebRef}) {
     const onChangeHandler = ({ file,fileName='fileName-L8.xlsx', onSuccess }) => {
         // console.log('[9 onChangeHandler] file:',file)
         const uid = file.uid;
+        const name = file.name;
         fileReader ({
             file: file,
             checkValue,
@@ -17,7 +18,7 @@ function UpLoadXlsx({data,checkValue,upLoadToWebRef}) {
         })
             .then(data => {
                 // eslint-disable-next-line react/prop-types
-                upLoadToWebRef.current({[uid]:data});
+                upLoadToWebRef.current({[uid]: {...data,fileName:name}});
                 onSuccess("ok");
             })
             .catch(e => {
@@ -34,13 +35,13 @@ function UpLoadXlsx({data,checkValue,upLoadToWebRef}) {
 
         switch (status) {
             case 'done':
-                message.success(`${info.file.name} file uploaded successfully.`);
+                message.success(`${info.file.name} file uploaded successfully.`).then();
                 return true;
             case 'error':
-                message.error(`${info.file.name} file upload failed.`);
+                message.error(`${info.file.name} file upload failed.`).then();
                 return true;
             case 'removed':
-                message.info(`${info.file.name} file removed successfully.`);
+                message.info(`${info.file.name} file removed successfully.`).then();
                 // eslint-disable-next-line react/prop-types
                 upLoadToWebRef.current({
                     [info.file.uid]:null
