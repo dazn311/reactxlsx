@@ -11,10 +11,9 @@ function ServiceBlock({data,headTabIdx,lengthForMerge=4}) {
     const [loadings, setLoadings] = useState(false);
 
     useEffect(()=> {
-        // const headTabIdx = _get(fileDataArr,[0,'headTabIdx']);
         const headArr = [..._get(data,['worksheetArr',headTabIdx],[])];
-        setTags(headArr.map((item) => item.value));
         const endSlice = lengthForMerge === -1 ? 0 : lengthForMerge;
+        setTags(headArr.slice(0,endSlice).map((item) => item.value));
         setSelectedTags(headArr.slice(0,endSlice).map((item) => item.value));
     },[data])
 
