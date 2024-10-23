@@ -31,12 +31,20 @@ function worksheetsParse(worksheet,numberToDate) {
         lastTabIndex,
         lastIndex,
         lengthForMerge,
-        widthColumns
+        widthColumns,
+        colHeaderNamesArr,
+        sequenceIndex
       } = endTabIdx(worksheetKeysArr,mergeCells,worksheet);
 
+    let sequenceNumber = 1;  
     worksheetKeysArr.forEach((valuesArr,row) => {
-        (valuesArr ?? []).forEach((value,col) => {
+        (valuesArr ?? []).forEach((value,col,thisArr) => {
+          if (row >= startAIdx && row <= endAIdx && sequenceIndex === col && typeof thisArr[col +1] === 'string') {
+            worksheetKeysArr[row][col] = valueHelper(String(sequenceNumber),colNumTypeArr[col],numberToDate);
+            sequenceNumber +=1;
+          } else {
             worksheetKeysArr[row][col] = valueHelper(value,colNumTypeArr[col],numberToDate);
+          }
         })
     });
     Object.keys(mergesObj).forEach((row/*"18"*/) => {

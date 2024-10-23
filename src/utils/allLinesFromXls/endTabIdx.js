@@ -3,11 +3,13 @@ import _get from 'lodash/get';
 export function endTabIdx(worksheetKeysArr=[],mergeCells=[],worksheet={}) {
   const titleIdx = worksheetKeysArr.findIndex(valuesArr => valuesArr.some(Boolean));
   const headTabIdx = worksheetKeysArr.findIndex(valuesArr => valuesArr.some(v => /№|фио|дата/i.test(v)));
-  const colNumTypeArr = colNumTypeArrHelper(worksheetKeysArr,headTabIdx);
+  const {colNumTypeArr, colHeaderNamesArr} = colNumTypeArrHelper(worksheetKeysArr,headTabIdx);
   const startAIdx = worksheetKeysArr.findIndex(valuesArr => /^\d+$/.test(valuesArr[0]));
   const endAIdx = worksheetKeysArr.findLastIndex(valuesArr => /^\d+$/.test(valuesArr[0]));
   const lastIndex = worksheetKeysArr.findLastIndex(valuesArr => valuesArr.some(Boolean));
   const lastTabIndex = worksheetKeysArr.findIndex((valuesArr,idx) => idx > startAIdx && !valuesArr.some(Boolean));//35
+  const sequenceIndex = colHeaderNamesArr.findIndex(v => /№/.test(v));
+  const fioIndex = colHeaderNamesArr.findIndex(v => /фио/i.test(v));
 
   // const width = worksheet.column("B").width();//35.9766
   // const cell = worksheet.row(startAIdx+1).cell(3); // Returns the cell at C5.
@@ -15,7 +17,7 @@ export function endTabIdx(worksheetKeysArr=[],mergeCells=[],worksheet={}) {
   // const value2 = worksheet.row(firstEmptyAIndex).cell(2).value();//'Булах Оксана Викторовна'
 
   //for ServiceBlock;
-  const lengthForMerge = lengthForMergeHelper(worksheetKeysArr,worksheet,colNumTypeArr,mergeCells,startAIdx);
+  const lengthForMerge = lengthForMergeHelper(worksheetKeysArr,worksheet,colNumTypeArr,mergeCells,startAIdx,fioIndex);
   const widthColumns = colNumTypeArr.reduce((accArr, _, idx)=>{
     // Get the B column, set its width and unhide it (assuming it was hidden).
     const width = worksheet.column(String.fromCharCode(idx+65)).width();//35.9766
@@ -32,12 +34,14 @@ export function endTabIdx(worksheetKeysArr=[],mergeCells=[],worksheet={}) {
     lastTabIndex,
     lastIndex,
     lengthForMerge,
-    widthColumns
+    widthColumns,
+    colHeaderNamesArr,
+    sequenceIndex
   }
 }
 
-function lengthForMergeHelper(worksheetKeysArr,worksheet,colNumTypeArr=[],mergeCells=[],startAIdx=0) {
-  const firstEmptyAIndex = worksheetKeysArr.findIndex((valuesArr,idx) => idx > startAIdx && !valuesArr[0]);//35
+function lengthForMergeHelper(worksheetKeysArr,worksheet,colNumTypeArr=[],mergeCells=[],startAIdx=0,fioIndex=0) {
+  const firstEmptyAIndex = worksheetKeysArr.findIndex((valuesArr,idx) => idx > startAIdx && !valuesArr[fioIndex]);//35
   const mergeCellsSt = mergeCells.join('|');
   return colNumTypeArr.findIndex((_,idx)=> {
     const currCol = idx +1;
@@ -57,21 +61,25 @@ function colNumTypeArrHelper(worksheetKeysArr,headTabIdx) {
     switch (true) {
         case /^№$/i.test(val):
         case /Сумма|Начислено|На руки/i.test(val):
-            accArr.push('number');
+            accArr['colNumTypeArr'].push('number');
             break;
         case /Дата|рождения/i.test(val):
-            accArr.push('date');
+          accArr['colNumTypeArr'].push('date');
             break;
         default:
           if (/^(\d+\.\d+\.\d+|\d+-\d+-\d+)$/i.test(val)) {
-            accArr.push('date');
+            accArr['colNumTypeArr'].push('date');
           } else if (/^(\d+(\.?|,?)\d+)$/i.test(val)) {
-            accArr.push('number');
+            accArr['colNumTypeArr'].push('number');
           } else {
-            accArr.push('string');
+            accArr['colNumTypeArr'].push('string');
           }
             break;
     }
+    accArr['colHeaderNamesArr'].push(val);
    return accArr;
-},[]);
+},{
+  colNumTypeArr:[],
+  colHeaderNamesArr:[]
+});
 }
