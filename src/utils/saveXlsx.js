@@ -3,11 +3,11 @@ import _get from 'lodash/get';
 import {writeToFile} from "./writeToFile.js";
 
 export const saveXlsx = async (data) => {
-    const worksheetArr = [..._get(data,[0,'worksheetArr'],[])];
-    const mergeCells = [..._get(data,[0,'mergeCells'],[])];
-    const startAIdx = _get(data,[0,'startAIdx'],0);
-    const endAIdx = _get(data,[0,'endAIdx'],0);
-    const fileName = _get(data,[0,'fileName'],'filename.xlsx');
+    const worksheetArr = [..._get(data,['worksheetArr'],[])];
+    const mergeCells = [..._get(data,['mergeCells'],[])];
+    const startAIdx = _get(data,['startAIdx'],0);
+    const endAIdx = _get(data,['endAIdx'],0);
+    const fileName = _get(data,['fileName'],'filename.xlsx');
 
     // Load a new blank workbook
     const workbook = await XlsxPopulate.fromBlankAsync();

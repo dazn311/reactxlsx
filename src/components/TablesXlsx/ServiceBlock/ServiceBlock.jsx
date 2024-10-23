@@ -5,21 +5,21 @@ import _get from 'lodash/get';
 import {saveXlsx} from "../../../utils/saveXlsx.js";
 import './ServiceBlock.scss';
 
-function ServiceBlock({fileDataArr}) {
+function ServiceBlock({data,headTabIdx}) {
     const [tagsData, setTags] = useState(['№', 'ФИО', 'Дата', 'Sports']);
     const [selectedTags, setSelectedTags] = useState(['№', 'ФИО', 'Дата']);
     const [loadings, setLoadings] = useState(false);
 
     useEffect(()=> {
-        const headTabIdx = _get(fileDataArr,[0,'headTabIdx']);
-        const headArr = [..._get(fileDataArr,[0,'worksheetArr',headTabIdx],[])];
+        // const headTabIdx = _get(fileDataArr,[0,'headTabIdx']);
+        const headArr = [..._get(data,['worksheetArr',headTabIdx],[])];
         setTags(headArr.slice(0,4).map((item) => item.value));
         setSelectedTags(headArr.slice(0,3).map((item) => item.value));
-    },[fileDataArr])
+    },[data])
 
-    if (fileDataArr.length === 0) {
-        return null;
-    }
+    // if (fileDataArr.length === 0) {
+    //     return null;
+    // }
     const handleChange = (tag, checked) => {
         const nextSelectedTags = checked
             ? [...selectedTags, tag]
@@ -29,7 +29,7 @@ function ServiceBlock({fileDataArr}) {
 
     const saveHandler = () => {
         setLoadings(true);
-        saveXlsx(fileDataArr)
+        saveXlsx(data)
             .finally(() => {
                 setLoadings(false);
             });
