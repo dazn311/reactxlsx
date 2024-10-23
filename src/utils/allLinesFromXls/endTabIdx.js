@@ -8,7 +8,6 @@ export function endTabIdx(worksheetKeysArr=[],mergeCells,worksheet) {
   const endAIdx = worksheetKeysArr.findLastIndex(valuesArr => /^\d+$/.test(valuesArr[0]));
   const lastIndex = worksheetKeysArr.findLastIndex(valuesArr => valuesArr.some(Boolean));
   const lastTabIndex = worksheetKeysArr.findIndex((valuesArr,idx) => idx > startAIdx && !valuesArr.some(Boolean));//35
-  const firstEmptyAIndex = worksheetKeysArr.findIndex((valuesArr,idx) => idx > startAIdx && !valuesArr[0]);//35
 
   // const width = worksheet.column("B").width();//35.9766
   // const cell = worksheet.row(startAIdx+1).cell(3); // Returns the cell at C5.
@@ -16,14 +15,13 @@ export function endTabIdx(worksheetKeysArr=[],mergeCells,worksheet) {
   // const value2 = worksheet.row(firstEmptyAIndex).cell(2).value();//'Булах Оксана Викторовна'
 
   //for ServiceBlock;
-  const lengthForMerge = lengthForMergeHelper(worksheet,colNumTypeArr,mergeCells,firstEmptyAIndex);
+  const lengthForMerge = lengthForMergeHelper(worksheet,colNumTypeArr,mergeCells,startAIdx);
   const widthColumns = colNumTypeArr.reduce((accArr, _, idx)=>{
     // Get the B column, set its width and unhide it (assuming it was hidden).
     const width = worksheet.column(String.fromCharCode(idx+65)).width();//35.9766
     accArr.push(width);
     return accArr;
   },[]);
-
 
   return {
     titleIdx,
@@ -38,7 +36,8 @@ export function endTabIdx(worksheetKeysArr=[],mergeCells,worksheet) {
   }
 }
 
-function lengthForMergeHelper(worksheet,colNumTypeArr=[],mergeCells=[],firstEmptyAIndex=0) {
+function lengthForMergeHelper(worksheet,colNumTypeArr=[],mergeCells=[],startAIdx=0) {
+  const firstEmptyAIndex = worksheetKeysArr.findIndex((valuesArr,idx) => idx > startAIdx && !valuesArr[0]);//35
   const mergeCellsSt = mergeCells.join('|');
   return colNumTypeArr.findIndex((_,idx)=> {
     const currCol = idx +1;
