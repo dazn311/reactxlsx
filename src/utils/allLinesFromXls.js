@@ -1,6 +1,6 @@
 // import { fromBlankAsync} from 'xlsx-populate';
-import helpers from "./allLinesFromXlsHelpers";
 import XlsxPop from "xlsx-populate/browser/xlsx-populate";
+import helpers from "./allLinesFromXls/allLinesFromXlsHelpers";
 
 /**
  * 2.1.Step: from form to tab, when click save;

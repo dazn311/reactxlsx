@@ -5,7 +5,7 @@ import _get from 'lodash/get';
 import {saveXlsx} from "../../../utils/saveXlsx.js";
 import './ServiceBlock.scss';
 
-function ServiceBlock({data,headTabIdx}) {
+function ServiceBlock({data,headTabIdx,lengthForMerge=4}) {
     const [tagsData, setTags] = useState(['№', 'ФИО', 'Дата', 'Sports']);
     const [selectedTags, setSelectedTags] = useState(['№', 'ФИО', 'Дата']);
     const [loadings, setLoadings] = useState(false);
@@ -13,8 +13,8 @@ function ServiceBlock({data,headTabIdx}) {
     useEffect(()=> {
         // const headTabIdx = _get(fileDataArr,[0,'headTabIdx']);
         const headArr = [..._get(data,['worksheetArr',headTabIdx],[])];
-        setTags(headArr.slice(0,4).map((item) => item.value));
-        setSelectedTags(headArr.slice(0,3).map((item) => item.value));
+        setTags(headArr.slice(0,lengthForMerge).map((item) => item.value));
+        setSelectedTags(headArr.slice(0,lengthForMerge).map((item) => item.value));
     },[data])
 
     // if (fileDataArr.length === 0) {

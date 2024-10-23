@@ -7,11 +7,11 @@ import './tablesXlsx.scss';
 
 export default function TablesXlsx({data={},changeValue,id=''}) {
     const tabRef = React.useRef(null);
-    const {worksheetArr, startAIdx, headTabIdx, endAIdx, titleIdx} = data;
+    const {worksheetArr, startAIdx, headTabIdx, endAIdx, titleIdx,lengthForMerge} = data;
 
     return (
         <div className='group cursor-pointer sm:m-2'>
-            <ServiceBlock data={data} headTabIdx={headTabIdx} />
+            <ServiceBlock data={data} headTabIdx={headTabIdx} lengthForMerge={lengthForMerge} />
             <div key={'tables_' + id} className='p-2'>
                 <table
                     ref={tabRef}

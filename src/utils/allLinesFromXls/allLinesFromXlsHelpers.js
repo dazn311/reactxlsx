@@ -1,6 +1,9 @@
-// import _get from 'lodash/get';
+import _get from 'lodash/get';
 // import _has from 'lodash/has';
 import _isObjectLike from "lodash/isObjectLike";
+import {mergeParse} from './mergeParse';
+import {valueHelper} from './valueHelper';
+import {endTabIdx} from './endTabIdx';
 
 const allLinesFromXlsHelpers = {
     worksheetsParse
@@ -10,82 +13,24 @@ export default allLinesFromXlsHelpers;
 
 // const fontName = 'Times New Roman';
 
-function mergeParse(mergeCells) {
-    return mergeCells.reduce((acc,merge/*"A18:A19"*/) => {
-        const [,startCol,startRow,endCol,endRow] = /^([A-Z])(\d+):([A-Z])(\d+)$/.exec(merge);
-        const sc = startCol.charCodeAt(0);
-        const startRowInt = parseInt(startRow);
-        const endRowInt = parseInt(endRow);
-        const ec = endCol.charCodeAt(0);
-
-        if (endRowInt > startRowInt) {
-            const rowSpan = endRowInt - startRowInt +1;//2
-            const row = startRowInt -1;
-            const column = sc -65;
-            acc[row] = {
-                ...acc[row],
-                [column]:{merge:{rowSpan:rowSpan}}
-            };
-            if (rowSpan > 1) {
-                Array(rowSpan -1).fill('').forEach((_,rowOffset) => {
-                    const offset = row + rowOffset +1;
-                    acc[offset] = {
-                        ... acc[offset],
-                        [column]:{style: {display:'none'}}
-
-                    }
-                })
-            }
-        }else if (ec > sc) {
-            const colSpan = ec - sc;
-            const column = sc -65;
-            const row = startRowInt -1;
-            acc[row] = {
-                ...acc[row],
-                [column]:{merge:{colSpan:colSpan +1}}//,style: {textWrap:'nowrap'}
-            };
-            if (colSpan > 0) {
-                Array(colSpan).fill('').forEach((_,colOffset) => {
-                    const offset = column + colOffset +1;
-                    acc[row] = {
-                        ... acc[row],
-                        [offset]:{ style: {display:'none'}}
-
-                    }
-                })
-            }
-        }
-        return acc;
-    },{});
-}
 
 function worksheetsParse(worksheet,numberToDate) {
     const mergeCells = Object.keys(worksheet['_mergeCells'] ?? {});
     const mergesObj  = mergeParse(mergeCells);
     // const b11_value = worksheet.cell('B11').value();//Алексеева Наталья Александровна
     const worksheetKeysArr  = worksheet.usedRange().value();
+
     if (!Array.isArray(worksheetKeysArr)) return null;
 
-    const titleIdx = worksheetKeysArr.findIndex(valuesArr => valuesArr.some(Boolean));
-    const headTabIdx = worksheetKeysArr.findIndex(valuesArr => valuesArr.some(v => /№|фио|дата/i.test(v)));
-    const colNumTypeArr = [...worksheetKeysArr[headTabIdx]].reduce((accArr,val) => {
-        switch (true) {
-            case /^№$/i.test(val):
-            case /Сумма|Начислено|На руки/i.test(val):
-                accArr.push('number');
-                break;
-            case /Дата|рождения/i.test(val):
-                accArr.push('date');
-                break;
-            default:
-                accArr.push('string');
-                break;
-        }
-       return accArr;
-    },[]);
-    const startAIdx = worksheetKeysArr.findIndex(valuesArr => /^\d+$/.test(valuesArr[0]));
-    const endAIdx = !!worksheetKeysArr?.findLastIndex ? worksheetKeysArr.findLastIndex(valuesArr => /^\d+$/.test(valuesArr[0])) : -1;//35
-    const lastIndex = !!worksheetKeysArr?.findLastIndex ? worksheetKeysArr.findLastIndex(valuesArr => valuesArr.some(Boolean)) : -1;//35
+    const {
+        titleIdx,
+        headTabIdx,
+        colNumTypeArr,
+        startAIdx,
+        endAIdx,
+        lastTabIndex,
+        lastIndex
+      } = endTabIdx(worksheetKeysArr,mergeCells,worksheet);
 
     worksheetKeysArr.forEach((valuesArr,row) => {
         (valuesArr ?? []).forEach((value,col) => {
@@ -127,46 +72,11 @@ function worksheetsParse(worksheet,numberToDate) {
         headTabIdx,
         startAIdx,
         endAIdx,
+        lastTabIndex,
         lastIndex,
         mergesObj,
         mergeCells
     };
-}
-
-function valueHelper(value,type='string',numberToDate) {
-    value = !!value ? value : '';
-    switch (type) {
-        case 'string':
-            if (typeof value === 'object') {
-                return {value:value.text().trim()};
-            }
-            return {value: typeof value === 'string' ? value.trim() : value,
-                type:'string'};
-        case 'number':
-            return {value:String(value),
-                type:'number'};
-        case 'object':
-            return {value:value.text().trim(),
-                type:'object'};
-        case 'date':
-            if (!value || /Invalid Date/i.test(numberToDate(value))) {
-                return {value: !!value ? value : ''};
-            }
-            const date = numberToDate(value);
-            return {
-                // value:`${padHelper(date.getDate())}.${padHelper(date.getMonth() +1)}.${date.getFullYear()}`,
-                value:`${date.getFullYear()}-${padHelper(date.getMonth() +1)}-${padHelper(date.getDate())}`,
-                // value:new Date('2015-01-01').toISOString(),
-                type:'date'
-            };//.style("numberFormat",'dd.MM.yy')
-        default:
-            const val = value === undefined ? '':value;
-            return {value: val};
-    }
-}
-
-function padHelper(value) {
-    return value < 10 ? `0${value}`: value;
 }
 
 // worksheet.usedRange().style({

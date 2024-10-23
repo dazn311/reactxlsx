@@ -1,11 +1,14 @@
 $font-stack: Helvetica, sans-serif;
 $primary-color: #333;
+$primary-dark-color-1: rgb(240, 246, 252);
+$primary-dark-color-2: #9198a1;
 $baseBackgroundColor:#242424;
+$baseBackgroundColor-dark-1:rgb(21, 27, 35);
 
 body {
   font: 100% $font-stack;
-  color: $primary-color;
-  background-color: $baseBackgroundColor;
+  color: $primary-dark-color-1;
+  background-color: $baseBackgroundColor-dark-1;
 }
 .ant-upload-wrapper {
   color: goldenrod;
@@ -15,4 +18,8 @@ body {
       color: red !important;
     }
   }
+}
+
+:where(.css-dev-only-do-not-override-1hpnbz2).ant-upload-wrapper .ant-upload-drag p.ant-upload-hint {
+  color: $primary-dark-color-2;
 }
