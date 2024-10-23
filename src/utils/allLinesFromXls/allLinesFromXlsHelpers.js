@@ -39,7 +39,7 @@ function worksheetsParse(worksheet,numberToDate) {
     let sequenceNumber = 1;  
     worksheetKeysArr.forEach((valuesArr,row) => {
         (valuesArr ?? []).forEach((value,col,thisArr) => {
-          if (row >= startAIdx && row <= endAIdx && sequenceIndex === col && typeof thisArr[col +1] === 'string') {
+          if (row >= startAIdx && row <= endAIdx && sequenceIndex === col && !!thisArr[col +1]) {
             worksheetKeysArr[row][col] = valueHelper(String(sequenceNumber),colNumTypeArr[col],numberToDate);
             sequenceNumber +=1;
           } else {
@@ -87,7 +87,9 @@ function worksheetsParse(worksheet,numberToDate) {
         mergesObj,
         mergeCells,
         lengthForMerge,
-        widthColumns
+        widthColumns,
+        colHeaderNamesArr,
+        sequenceIndex
     };
 }
 

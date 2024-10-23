@@ -11,15 +11,11 @@ function ServiceBlock({data,headTabIdx,lengthForMerge=4}) {
     const [loadings, setLoadings] = useState(false);
 
     useEffect(()=> {
-        const headArr = [..._get(data,['worksheetArr',headTabIdx],[])];
-        const endSlice = lengthForMerge === -1 ? 0 : lengthForMerge;
-        setTags(headArr.slice(0,endSlice).map((item) => item.value));
-        setSelectedTags(headArr.slice(0,endSlice).map((item) => item.value));
+        const headArr = [..._get(data,['worksheetArr',headTabIdx],[])].filter(({value})=> Boolean(value));
+        setTags(headArr.slice(0,lengthForMerge).map((item) => item.value));
+        setSelectedTags(headArr.slice(0,lengthForMerge).map((item) => item.value));
     },[data])
 
-    // if (fileDataArr.length === 0) {
-    //     return null;
-    // }
     const handleChange = (tag, checked) => {
         const nextSelectedTags = checked
             ? [...selectedTags, tag]
@@ -40,33 +36,17 @@ function ServiceBlock({data,headTabIdx,lengthForMerge=4}) {
             direction="horizontal"
             align={'start'}
             size="middle"
-            style={{display: 'flex',justifyContent:'space-between'}}
+            style={SPACE_STYLES}
         >
             <Space.Compact>
-                <Tag style={{
-                    color: "#813a03",
-                    backgroundColor:'transparent',
-                    fontSize: 16,
-                    border:'none',
-                    paddingInline:5,
-                    marginInlineEnd:4
-                }}>объединить:</Tag>
+                <Tag style={TAG_STYLES}>объединить:</Tag>
                 {tagsData.length > 0 ? tagsData.map((tag) => (
                     <Tag.CheckableTag
                         key={tag}
-                        style={{
-                            color: selectedTags.includes(tag) ? 'darkseagreen' :"#f56a00",//darkmagenta
-                            backgroundColor:selectedTags.includes(tag) ? '#80808075' :'transparent',
-                            fontSize: 14,
-                            padding: '0 5px',
-                            paddingInline:5,
-                            marginInlineEnd:4
-                    }}
+                        style={checkTagStyles(selectedTags,tag)}
                         checked={selectedTags.includes(tag)}
                         onChange={(checked) => handleChange(tag, checked)}
-                    >
-                        {tag}
-                    </Tag.CheckableTag>
+                    >{tag}</Tag.CheckableTag>
                 )) : null}
             </Space.Compact>
             <Space.Compact>
@@ -76,14 +56,33 @@ function ServiceBlock({data,headTabIdx,lengthForMerge=4}) {
                     onClick={saveHandler}
                     ghost
                     loading={loadings}
-                    style={{ color: "#f56a00", borderColor: "#f56a00" }}
-                    size={'small'}>
-                    Сохранить
-                </Button>
+                    style={BUTTON_STYLES}
+                    size={'small'}>Сохранить</Button>
             </Space.Compact>
         </Space>
-
     </div>
 }
 
 export default ServiceBlock;
+
+const SPACE_STYLES = {display: 'flex',justifyContent:'space-between'};
+const BUTTON_STYLES = { color: "#f56a00", borderColor: "#f56a00" };
+const TAG_STYLES = {
+    color: "#813a03",
+    backgroundColor:'transparent',
+    fontSize: 16,
+    border:'none',
+    paddingInline:5,
+    marginInlineEnd:4
+};
+
+function checkTagStyles(selectedTags,tag) {
+    return {
+        color: selectedTags.includes(tag) ? 'darkseagreen' :"#f56a00",//darkmagenta
+        backgroundColor:selectedTags.includes(tag) ? '#80808075' :'transparent',
+        fontSize: 14,
+        padding: '0 5px',
+        paddingInline:5,
+        marginInlineEnd:4
+    };
+}

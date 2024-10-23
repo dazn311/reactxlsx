@@ -17,7 +17,7 @@ export function endTabIdx(worksheetKeysArr=[],mergeCells=[],worksheet={}) {
   // const value2 = worksheet.row(firstEmptyAIndex).cell(2).value();//'Булах Оксана Викторовна'
 
   //for ServiceBlock;
-  const lengthForMerge = lengthForMergeHelper(worksheetKeysArr,worksheet,colNumTypeArr,mergeCells,startAIdx,fioIndex);
+  const lengthForMerge = lengthForMergeHelper(worksheetKeysArr,worksheet,colNumTypeArr,mergeCells,startAIdx,endAIdx,fioIndex);
   const widthColumns = colNumTypeArr.reduce((accArr, _, idx)=>{
     // Get the B column, set its width and unhide it (assuming it was hidden).
     const width = worksheet.column(String.fromCharCode(idx+65)).width();//35.9766
@@ -40,20 +40,47 @@ export function endTabIdx(worksheetKeysArr=[],mergeCells=[],worksheet={}) {
   }
 }
 
-function lengthForMergeHelper(worksheetKeysArr,worksheet,colNumTypeArr=[],mergeCells=[],startAIdx=0,fioIndex=0) {
-  const firstEmptyAIndex = worksheetKeysArr.findIndex((valuesArr,idx) => idx > startAIdx && !valuesArr[fioIndex]);//35
-  const mergeCellsSt = mergeCells.join('|');
+function emptyAIndexArrHelper(worksheet,colNumTypeArr,worksheetKeysArr,mergeCellsSt,startAIdx,endAIdx,fioIndex) {
+  const firstEmptyAIndexArr = worksheetKeysArr.reduce((acc,valuesArr,idx) => {
+    if (idx > startAIdx && idx <= endAIdx && !valuesArr[fioIndex]) {
+      acc.push(idx);
+    }
+    return acc;
+  },[]);
+
+  let index = -1;
+  for (const firstEmptyAIndexArrElement of firstEmptyAIndexArr) {
+    if (index > 0) {
+      break;
+    }
+
+    const idxCurr = findIndEmptyA(worksheet,colNumTypeArr,firstEmptyAIndexArrElement,mergeCellsSt);
+
+    if (idxCurr > 0 && index === -1) {
+      index = idxCurr;
+    }
+  }
+
+  return index;
+}
+
+function findIndEmptyA(worksheet,colNumTypeArr,firstEmptyAIndexArrElement,mergeCellsSt) {
   return colNumTypeArr.findIndex((_,idx)=> {
     const currCol = idx +1;
-    const val = worksheet.row(firstEmptyAIndex + 1).cell(currCol).value();
+    const val = worksheet.row(firstEmptyAIndexArrElement + 1).cell(currCol).value();
 
     if (val !== undefined) {
-      const regx = new RegExp(`${String.fromCharCode(idx+65-1)}${firstEmptyAIndex}:\\w+`,'g');
+      const regx = new RegExp(`${String.fromCharCode(idx+65-1)}${firstEmptyAIndexArrElement}:\\w+`,'g');
       return mergeCellsSt.match(regx);
     }
 
     return false;
   });
+}
+
+function lengthForMergeHelper(worksheetKeysArr,worksheet,colNumTypeArr=[],mergeCells=[],startAIdx=0,endAIdx=0,fioIndex=0) {
+  const mergeCellsSt = mergeCells.join('|');
+  return emptyAIndexArrHelper(worksheet,colNumTypeArr,worksheetKeysArr,mergeCellsSt,startAIdx,endAIdx,fioIndex);
 }
 
 function colNumTypeArrHelper(worksheetKeysArr,headTabIdx) {
